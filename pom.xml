@@ -55,6 +55,36 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Resilience4j Starter for Spring Boot 3/4 -->
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-spring-boot3</artifactId>
+			<version>2.2.0</version> <!-- Use 2.x versions for SB 3/4 -->
+		</dependency>
+
+		<!-- Required for Resilience4j AOP annotations (@CircuitBreaker, @Retry, etc.) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+		</dependency>
+
+		<!-- Optional but Recommended: For monitoring metrics via Actuator -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<!-- JSP Support -->
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-jasper</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jstl</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>

@@ -19,6 +19,6 @@ public class OrderApplication {
 
 	@GetMapping("/")
 	public String sayHelllo(){
-		return "Hi";
+		return "index.jsp";
 	}
 }

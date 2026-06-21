@@ -1,19 +1,18 @@
 package com.springai.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springai.dto.Order;
-import com.springai.dto.QRequest;
 import com.springai.dto.QuestionRequest;
 import com.springai.dto.QuestionResponse;
 import com.springai.service.OrderService;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.ai.chat.client.ChatClient;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import reactor.core.publisher.Flux;
-
-import java.awt.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/order")
@@ -21,12 +20,20 @@ public class OrderController {
 
     @Autowired
     OrderService orderService;
+
     @Autowired
-    private ObjectMapper objectMapper;
+    RestTemplate restTemplate;
+
     @GetMapping(value = "/{id}")
+    @CircuitBreaker(name = "order-service", fallbackMethod = "getDefaultValue")
     public Order getOrder(@PathVariable("id") long id) {
         System.out.println("Inside getOrder");
-        return new Order(1l, "my data");
+        restTemplate.getForObject("http://localhost:8080/hello", String.class);
+        return orderService.findOrderById(id);
+    }
+
+    public Order getDefaultValue(Exception ex) {
+        return new Order(1l, "failedData");
     }
 
     @GetMapping("/hello")
@@ -35,10 +42,48 @@ public class OrderController {
         return new Order(1l, "my data");
     }
 
-    @GetMapping("/ask")
-    public String ask(@RequestParam("question") String question) {
-        //return orderService.askQuestion(question);
+    //create getHistory endpoint to return list of question and answer pairs for a given conversation id
+    //follow end point as base controller + /history/{conversationId}  and return type should be list of question and answer pairs
+    // implement circuit breaker for this endpoint as well and return empty list in case of failure
+    @GetMapping("/history/{conversationId}")
+    @CircuitBreaker(name = "order-service2", fallbackMethod = "getDefaultHistory")
+    public String getHistory(@PathVariable("conversationId") String conversationId) {
+        //return orderService.getHistory(conversationId);
         return "";
+    }
+
+    public String getDefaultHistory(Exception ex) {
+        return "detuual tvalue";
+    }
+
+    // CRUD endpoints for Order
+    @GetMapping("/all")
+    public List<Order> getAllOrders() {
+        return orderService.findAllOrders();
+    }
+
+    @PostMapping("")
+    public ResponseEntity<Order> createOrder(@RequestBody Order order) {
+        Order created = orderService.createOrder(order);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Order> updateOrder(@PathVariable("id") long id, @RequestBody Order order) {
+        Order updated = orderService.updateOrder(id, order);
+        if (updated == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOrderById(@PathVariable("id") long id) {
+        boolean deleted = orderService.deleteOrder(id);
+        if (!deleted) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/askQuestion")

@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -22,7 +26,35 @@ public class OrderServiceImpl implements OrderService {
     private ChatMemory chatMemory;
     @Override
     public Order findOrderById(long id) {
-        return null;
+        return orders.get(id);
+    }
+
+    @Override
+    public List<Order> findAllOrders() {
+        return new ArrayList<>(orders.values());
+    }
+
+    @Override
+    public Order createOrder(Order order) {
+        long id = order.id() <= 0 ? idGenerator.incrementAndGet() : order.id();
+        var created = new Order(id, order.details());
+        orders.put(id, created);
+        return created;
+    }
+
+    @Override
+    public Order updateOrder(long id, Order order) {
+        if (!orders.containsKey(id)) {
+            return null;
+        }
+        var updated = new Order(id, order.details());
+        orders.put(id, updated);
+        return updated;
+    }
+
+    @Override
+    public boolean deleteOrder(long id) {
+        return orders.remove(id) != null;
     }
 
     public static final String systemPrompt = """
@@ -83,4 +115,8 @@ public class OrderServiceImpl implements OrderService {
                 system(systemPrompt)
                 .user(question).stream().content();
     }
+
+    // Simple in-memory store for orders
+    private final Map<Long, Order> orders = new ConcurrentHashMap<>();
+    private final AtomicLong idGenerator = new AtomicLong(0);
 }
