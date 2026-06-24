@@ -3,6 +3,7 @@ package com.springai.controller;
 import com.springai.dto.Order;
 import com.springai.dto.QuestionRequest;
 import com.springai.dto.QuestionResponse;
+import com.springai.dto.QuestionAnswerPair;
 import com.springai.service.OrderService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import reactor.core.publisher.Flux;
+import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/order")
@@ -47,13 +50,13 @@ public class OrderController {
     // implement circuit breaker for this endpoint as well and return empty list in case of failure
     @GetMapping("/history/{conversationId}")
     @CircuitBreaker(name = "order-service2", fallbackMethod = "getDefaultHistory")
-    public String getHistory(@PathVariable("conversationId") String conversationId) {
-        //return orderService.getHistory(conversationId);
-        return "";
+    public List<QuestionAnswerPair> getHistory(@PathVariable("conversationId") String conversationId) {
+        return orderService.getConversationHistory(conversationId);
     }
 
-    public String getDefaultHistory(Exception ex) {
-        return "detuual tvalue";
+    public List<QuestionAnswerPair> getDefaultHistory(String conversationId, Exception ex) {
+        System.out.println("Circuit breaker fallback triggered for getHistory: " + ex.getMessage());
+        return Collections.emptyList();
     }
 
     // CRUD endpoints for Order
@@ -87,7 +90,7 @@ public class OrderController {
     }
 
     @PostMapping("/askQuestion")
-    public QuestionResponse askQuestion(@RequestBody QuestionRequest questionRequest) {
+    public QuestionResponse askQuestion(@Valid @RequestBody QuestionRequest questionRequest) {
         if (questionRequest.questionText() == null) {
             questionRequest = new QuestionRequest("what is java", "12");
         }
@@ -99,7 +102,7 @@ public class OrderController {
         return orderService.askQuestion(questionRequest, "12");
     }
     @PostMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> stream(@RequestBody QuestionRequest request) {
+    public Flux<String> stream(@Valid @RequestBody QuestionRequest request) {
         return orderService.stream(request.questionText());
     }
 }

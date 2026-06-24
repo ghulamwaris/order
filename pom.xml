@@ -68,6 +68,12 @@
 			<artifactId>spring-boot-starter-aop</artifactId>
 		</dependency>
 
+		<!-- Validation (Jakarta Bean Validation) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+
 		<!-- Optional but Recommended: For monitoring metrics via Actuator -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
