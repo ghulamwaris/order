@@ -2,6 +2,7 @@ package com.springai.service;
 
 import com.springai.dto.Order;
 import com.springai.dto.QuestionResponse;
+import com.springai.dto.QuestionAnswerPair;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -24,6 +25,8 @@ public class OrderServiceImpl implements OrderService {
     private ChatClient chatClient;
     @Autowired
     private ChatMemory chatMemory;
+    @Autowired
+    private ConversationService conversationService;
     @Override
     public Order findOrderById(long id) {
         return orders.get(id);
@@ -95,7 +98,7 @@ public class OrderServiceImpl implements OrderService {
                         chatMemory
                 ).build();
 
-        return new QuestionResponse(chatClient.prompt(prompt)
+        String content = chatClient.prompt(prompt)
                 .system(systemPrompt)
                 .user(question)
                 .advisors(advisor)
@@ -106,17 +109,54 @@ public class OrderServiceImpl implements OrderService {
                 .options(OllamaOptions.builder()
                         .temperature(0.0)
                         .build())
-                .call().content());
+                .call().content();
+
+        String sanitized = sanitizeResponse(content);
+        
+        // Auto-save Q/A to conversation history
+        conversationService.addToConversation(conversationId, question, sanitized);
+        
+        return new QuestionResponse(sanitized);
     }
 
     @Override
     public Flux<String> stream(String question) {
-      return   chatClient.prompt().
-                system(systemPrompt)
-                .user(question).stream().content();
+      return chatClient.prompt()
+                .system(systemPrompt)
+                .user(question)
+                .stream()
+                .content()
+                .map(this::sanitizeResponse);
+    }
+
+    /**
+     * Simple sanitizer to remove markdown fences and inline backticks, and normalize whitespace.
+     */
+    private String sanitizeResponse(String input) {
+        if (input == null) return null;
+        // remove triple backtick blocks and tildes
+        String withoutFences = input.replaceAll("(?m)```.*?```", "");
+        withoutFences = withoutFences.replaceAll("(?m)~~~.*?~~~", "");
+        // remove any remaining fence markers like ```java or ```txt
+        withoutFences = withoutFences.replaceAll("(?m)```.*", "");
+        // remove inline backticks (replace with empty string, not space)
+        withoutFences = withoutFences.replace('`', '\u0000');  // placeholder
+        // normalize multiple spaces to single space
+        withoutFences = withoutFences.replaceAll(" +", " ");
+        // replace placeholder with empty
+        withoutFences = withoutFences.replace('\u0000', ' ');
+        // normalize multiple blank lines to maximum two
+        withoutFences = withoutFences.replaceAll("(?m)\\n\\s*\\n\\s*\\n+", "\n\n");
+        // trim
+        return withoutFences.trim();
     }
 
     // Simple in-memory store for orders
     private final Map<Long, Order> orders = new ConcurrentHashMap<>();
     private final AtomicLong idGenerator = new AtomicLong(0);
+
+    @Override
+    public List<QuestionAnswerPair> getConversationHistory(String conversationId) {
+        return conversationService.getHistory(conversationId);
+    }
 }

@@ -2,6 +2,7 @@ package com.springai.service;
 
 import com.springai.dto.Order;
 import com.springai.dto.QuestionResponse;
+import com.springai.dto.QuestionAnswerPair;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -20,4 +21,6 @@ public interface OrderService {
     QuestionResponse askQuestion(String question, String conversationId);
 
     Flux<String> stream(String question);
+
+    List<QuestionAnswerPair> getConversationHistory(String conversationId);
 }
