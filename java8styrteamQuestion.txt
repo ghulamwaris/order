@@ -1,0 +1,32 @@
+Return all employee names.
+Return all IT employees.
+Return employees with salary > 60000.
+Return distinct department names.
+Sort employees by salary.
+Sort employees by name.
+Find the first employee.
+Find any employee.
+
+Medium
+Group employees by department.
+Count employees department-wise.
+Average salary department-wise.
+Maximum salary department-wise.
+Minimum salary department-wise.
+Partition employees by salary > 60000.
+Find all employee names in the IT department.
+Find employees whose names start with 'J'.
+
+Hard (Senior Interview)
+
+Second highest salary.
+Third highest salary.
+Top 3 highest-paid employees.
+Department having the highest average salary.
+Employees having duplicate names.
+Salary frequency map.
+Department-wise highest-paid employee.
+Department-wise second highest salary.
+Employees sorted by department and then salary.
+Join all employee names into a comma-separated string.
+Convert List<Emp> to Map<String, Emp> using employee name as the key (and discuss duplicate-key handling).

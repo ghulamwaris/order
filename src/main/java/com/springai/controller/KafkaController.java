@@ -1,6 +1,7 @@
 package com.springai.controller;
 
 import com.springai.dto.PublishRequest;
+import org.springframework.aop.ThrowsAdvice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/kafka")
 public class KafkaController {
 
+    //genb=
     //@Autowired
     private final KafkaTemplate<String, String> kafkaTemplate;
 
@@ -30,6 +32,12 @@ public class KafkaController {
         String message = request.message() == null ? "" : request.message();
 
         kafkaTemplate.send(topic, message);
+
+//        Runnable runnable = () ->{
+//            System.out.printf("testing a");
+//        };
+//        Thread thread = new Thread(runnable);
+//        thread.start();
         return ResponseEntity.ok("Message published to topic: " + topic);
     }
 }
