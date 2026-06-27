@@ -1,4 +1,4 @@
-package com.springai.controller;
+package com.springai.controller.interview;
 
 import java.util.*;
 import java.util.stream.Collectors;

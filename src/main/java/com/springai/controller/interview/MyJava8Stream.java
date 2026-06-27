@@ -1,6 +1,4 @@
-package com.springai.controller;
-
-import org.apache.logging.log4j.util.PropertySource;
+package com.springai.controller.interview;
 
 import java.util.*;
 import java.util.stream.Collectors;
