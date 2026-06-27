@@ -98,6 +98,7 @@ public class OrderServiceImpl implements OrderService {
                         chatMemory
                 ).build();
 
+       // chatClient.prompt().system(systemPrompt).user(question).call().content(); // Warm up the chat client
         String content = chatClient.prompt(prompt)
                 .system(systemPrompt)
                 .user(question)

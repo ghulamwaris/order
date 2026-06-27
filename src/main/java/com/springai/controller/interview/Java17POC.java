@@ -1,10 +1,8 @@
-package com.springai.controller;
+package com.springai.controller.interview;
 
-import javax.crypto.SealedObject;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
+import com.springai.controller.MyEmployee;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Java17POC {
@@ -22,7 +20,8 @@ public class Java17POC {
                 and I am learning java 17""";
         System.out.println(textblock);
         //testSwitch("hello");
-        JAVA8API();
+        //JAVA8API();
+        playWithJava8AndMyEmployee();
     }
 
     private static void testSwitch(String value) {
@@ -58,9 +57,22 @@ public class Java17POC {
         var employeeList = java.util.List.of(new MyEmployee(1, "Ghulam Waris", 1000),
                 new MyEmployee(2, "John Doe", 2000),
                 new MyEmployee(3, "Jane Doe", 3000));
+
+        
         employeeList.stream().sorted(Comparator.comparing(MyEmployee :: getSalary).reversed()).skip(1).findFirst().ifPresent(e -> System.out.println(e.getName()));
+
+        employeeList.stream().sorted(Comparator.comparing(MyEmployee :: getSalary).reversed()).skip(1);
         //get the name of employee with id 2
         String name = employeeList.stream().filter(e -> e.getId() == 2).findFirst().map(MyEmployee::getName).orElse("Not found");
         System.out.println(name);
+
+        String s = "hello java is great";
+
+        List<String> unique = Arrays.stream(s.split(" ")).distinct().sorted().collect(Collectors.toList());
+        System.out.printf("uni" + unique);
+
+        List<Integer> numers = Arrays.asList(10, 15, 5, 6, 20, 12);
+        numers.stream().sorted((a, b) -> b-a).skip(1).findFirst().ifPresent(System.out::println);
+
     }
 }
